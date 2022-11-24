@@ -1,4 +1,5 @@
-import 'package:flutter_task/screens/product_list/product_list_model.dart';
+import 'package:flutter_task/helper/global_variables.dart';
+import 'package:flutter_task/screens/cart_view/cart_model.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
@@ -13,37 +14,28 @@ class DBHelper {
   }
 
   static Future onDatabaseCreate(Database db, int version) async {
-    await db.execute(
-        "create table Cart (id text primary key,image text,name text, price text)");
+    await db.execute("create table Cart (id text primary key,image text,name text, price text, quantity integer)");
   }
 
-  Future<List<ProductListModel>> loadCartData() async {
-    List<ProductListModel> data = [];
+  loadCartData() async {
     Database dbClient = await initDatabase();
-    List<Map<String, dynamic>> maps =
-        await dbClient.rawQuery('Select * From Cart');
-    if (maps.isNotEmpty) {
-      for (var m in maps) {
-        data.add(ProductListModel.fromJson(m));
-      }
-      return data;
-    }
-    return data;
+    List<Map<String, dynamic>> maps = await dbClient.rawQuery('Select * From Cart');
+    GlobalVariables.cartList.addAll(maps.map((e) => CartModel.fromJson(e)));
   }
 
-  Future<int> insertCartItem(Map<String, dynamic> item) async {
-    Database dbClient = await initDatabase();
-    return await dbClient.insert('Cart', item);
-  }
-
-  Future<int> updateCartItem(ProductListModel item) async {
+  Future<int> insertCartItem(CartModel item) async {
     Database dbClient = await initDatabase();
     Map<String, dynamic> data = item.toJson();
-    return await dbClient
-        .update('Cart', data, where: 'id = ?', whereArgs: [item.id]);
+    return await dbClient.insert('Cart', data);
   }
 
-  Future<int> removeCartItem(int id) async {
+  Future<int> updateCartItem(CartModel item) async {
+    Database dbClient = await initDatabase();
+    Map<String, dynamic> data = item.toJson();
+    return await dbClient.update('Cart', data, where: 'id = ?', whereArgs: [item.id]);
+  }
+
+  Future<int> removeCartItem(String id) async {
     Database dbClient = await initDatabase();
     return await dbClient.delete('Cart', where: 'id = ?', whereArgs: [id]);
   }

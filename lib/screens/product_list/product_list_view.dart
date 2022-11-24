@@ -1,6 +1,5 @@
 import 'package:badges/badges.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_task/helper/global_variables.dart';
 import 'package:flutter_task/screens/cart_view/cart_view.dart';
@@ -56,10 +55,10 @@ class ProductListView extends StatelessWidget {
       actions: [
         Obx(
           () => Badge(
-            showBadge: (viewModel.cartCount.value>0) ? true : false,
+            showBadge: (GlobalVariables.cartCount.value>0) ? true : false,
             position: BadgePosition.topEnd(top: 10, end: 6),
             badgeContent: Text(
-              viewModel.cartCount.value.toString(),
+              GlobalVariables.cartCount.value.toString(),
               style: const TextStyle(
                 fontSize: 8,
                 color: Colors.white,
@@ -68,8 +67,6 @@ class ProductListView extends StatelessWidget {
             ),
             child: IconButton(
               onPressed: () {
-                // GlobalVariables.showBackArrow.value = true;
-                // CommonFunctions.cartCalculation();
                 Get.to(() => CartView());
               },
               icon: const Icon(Icons.shopping_bag_outlined),

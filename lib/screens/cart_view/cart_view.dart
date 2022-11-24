@@ -11,7 +11,7 @@ import 'package:get/get.dart';
 class CartView extends StatelessWidget {
   CartView({Key? key}) : super(key: key);
 
-  final CartViewModel cartViewModel = Get.put(CartViewModel());
+  final CartViewModel viewModel = Get.put(CartViewModel());
 
   @override
   Widget build(BuildContext context) {
@@ -40,53 +40,7 @@ class CartView extends StatelessWidget {
                     ],
                   ),
                 )
-              : Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 15),
-                  width: double.infinity,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SvgPicture.asset(
-                        'assets/images/cart.svg',
-                        width: Get.width * 0.65,
-                      ),
-                      const Padding(
-                        padding: EdgeInsets.only(bottom: 2, top: 20),
-                        child: Text(
-                          'Empty Cart',
-                          style: TextStyle(
-                            color: Color(0xffba8d7d),
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
-                          ),
-                        ),
-                      ),
-                      const Text(
-                        'Please Add something in your cart',
-                        style: TextStyle(
-                          color: Color(0xffba8d7d),
-                          fontSize: 13,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      CustomElevatedBtn(
-                        width: Get.width * 0.5,
-                        height: 40,
-                        backgroundColor: const Color(0xffba8d7d),
-                        onPressed: () {
-                          Get.back();
-                        },
-                        child: const Text(
-                          'Shop now',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+              : emptyCartView(),
         ),
       ),
     );
@@ -124,10 +78,9 @@ class CartView extends StatelessWidget {
       children: [
         Dismissible(
           direction: DismissDirection.endToStart,
-          key: Key(
-              GlobalVariables.cartList[index].productListModel.id.toString()),
+          key: Key(GlobalVariables.cartList[index].id.toString()),
           onDismissed: (direction) {
-            //cartViewModel.deleteProduct(index);
+            viewModel.deleteProduct(index);
           },
           background: Container(
             color: Colors.red,
@@ -164,9 +117,10 @@ class CartView extends StatelessWidget {
                   child: Padding(
                     padding: const EdgeInsets.only(left: 13),
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Padding(
-                          padding: const EdgeInsets.only(top: 1),
+                          padding: const EdgeInsets.only(top: 1, bottom: 3),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -174,10 +128,10 @@ class CartView extends StatelessWidget {
                               Expanded(
                                 child: Text(
                                   GlobalVariables.cartList[index]
-                                              .productListModel.name !=
+                                              .name !=
                                           null
                                       ? GlobalVariables.cartList[index]
-                                          .productListModel.name!
+                                          .name!
                                       : 'N/A',
                                   maxLines: 2,
                                   style: const TextStyle(
@@ -186,11 +140,16 @@ class CartView extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                              const Padding(
-                                padding: EdgeInsets.only(left: 5),
+                              Padding(
+                                padding: const EdgeInsets.only(left: 5),
                                 child: Text(
-                                  'size price',
-                                  style: TextStyle(
+                                  GlobalVariables.cartList[index]
+                                      .price !=
+                                      null
+                                      ? 'Rs: ${GlobalVariables.cartList[index]
+                                      .price!}'
+                                      : 'N/A',
+                                  style: const TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -199,28 +158,12 @@ class CartView extends StatelessWidget {
                             ],
                           ),
                         ),
-                        Padding(
-                          padding: const EdgeInsets.only(top: 3, bottom: 4),
-                          child: Row(
-                            children: const [
-                              Text(
-                                'category',
-                                style: TextStyle(
-                                  fontSize: 11.3,
-                                  fontWeight: FontWeight.w500,
-                                  color: Color(0xffB1B1B1),
-                                ),
-                              ),
-                              SizedBox(width: 8),
-                              Text(
-                                'size',
-                                style: TextStyle(
-                                  fontSize: 11.3,
-                                  fontWeight: FontWeight.w500,
-                                  color: Color(0xffB1B1B1),
-                                ),
-                              ),
-                            ],
+                        Text(
+                          GlobalVariables.cartList[index].id ?? '',
+                          style: const TextStyle(
+                            fontSize: 11.3,
+                            fontWeight: FontWeight.w500,
+                            color: Color(0xffB1B1B1),
                           ),
                         ),
                         cartCounter(index),
@@ -245,7 +188,7 @@ class CartView extends StatelessWidget {
       height: 60,
       width: 60,
       child: CachedNetworkImage(
-        imageUrl: '',
+        imageUrl: GlobalVariables.cartList[index].image ?? '',
         imageBuilder: (context, imageProvider) {
           return Container(
             decoration: BoxDecoration(
@@ -287,20 +230,20 @@ class CartView extends StatelessWidget {
           (GlobalVariables.cartList[index].quantity == 1)
               ? InkWell(
                   onTap: () {
-                    // cartViewModel.deleteProduct(index);
+                    viewModel.deleteProduct(index);
                   },
                   child: const FaIcon(
                     FontAwesomeIcons.trashCan,
-                    size: 12,
+                    size: 13,
                   ),
                 )
               : InkWell(
                   onTap: () {
-                    // cartViewModel.decrementProduct(index);
+                    viewModel.decrementProduct(index);
                   },
                   child: const Icon(
                     Icons.remove,
-                    size: 16,
+                    size: 17,
                   ),
                 ),
           Padding(
@@ -312,11 +255,11 @@ class CartView extends StatelessWidget {
           ),
           InkWell(
             onTap: () {
-              //cartViewModel.incrementProduct(index);
+              viewModel.incrementProduct(index);
             },
             child: Icon(
               Icons.add_circle_rounded,
-              size: 16,
+              size: 17,
               color: Get.theme.primaryColor,
             ),
           ),
@@ -377,23 +320,21 @@ class CartView extends StatelessWidget {
       padding: const EdgeInsets.only(top: 35),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          const Text(
+        children: const [
+          Text(
             'Subtotal',
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,
             ),
           ),
-          Obx(
-            () => Text(
-              GlobalVariables.subTotal.value.toStringAsFixed(2),
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w800,
-              ),
+          Text(
+            '0.0',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
             ),
-          )
+          ),
         ],
       ),
     );
@@ -404,23 +345,21 @@ class CartView extends StatelessWidget {
       padding: const EdgeInsets.only(top: 15),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          const Text(
+        children: const [
+          Text(
             'Discount',
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,
             ),
           ),
-          Obx(
-            () => Text(
-              GlobalVariables.discount.value.toStringAsFixed(2),
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w800,
-              ),
+          Text(
+            '0.0',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
             ),
-          )
+          ),
         ],
       ),
     );
@@ -429,7 +368,7 @@ class CartView extends StatelessWidget {
   Widget total() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
+      children:  [
         const Text(
           'Total',
           style: TextStyle(
@@ -437,15 +376,13 @@ class CartView extends StatelessWidget {
             fontWeight: FontWeight.bold,
           ),
         ),
-        Obx(
-          () => Text(
-            GlobalVariables.total.value.toStringAsFixed(2),
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w800,
-            ),
+        Text(
+          viewModel.totalPrice.value.toString(),
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w800,
           ),
-        )
+        ),
       ],
     );
   }
@@ -464,14 +401,61 @@ class CartView extends StatelessWidget {
             style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
           ),
           onPressed: () {
-            // if (GlobalVariables.token.value != "") {
-            //   Get.to(() => CheckoutView());
-            // }else{
-            //   Get.to(()=>LoginSignupView());
-            // }
+
           },
         ),
       ),
     );
   }
+
+  Widget emptyCartView(){
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 15),
+      width: double.infinity,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SvgPicture.asset(
+            'assets/images/cart.svg',
+            width: Get.width * 0.65,
+          ),
+          const Padding(
+            padding: EdgeInsets.only(bottom: 2, top: 20),
+            child: Text(
+              'Empty Cart',
+              style: TextStyle(
+                color: Color(0xffba8d7d),
+                fontWeight: FontWeight.bold,
+                fontSize: 15,
+              ),
+            ),
+          ),
+          const Text(
+            'Please Add something in your cart',
+            style: TextStyle(
+              color: Color(0xffba8d7d),
+              fontSize: 13,
+            ),
+          ),
+          const SizedBox(height: 20),
+          CustomElevatedBtn(
+            width: Get.width * 0.5,
+            height: 40,
+            backgroundColor: const Color(0xffba8d7d),
+            onPressed: () {
+              Get.back();
+            },
+            child: const Text(
+              'Shop now',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
 }

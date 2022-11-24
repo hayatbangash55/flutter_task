@@ -1,21 +1,27 @@
-
-import 'package:flutter_task/screens/product_list/product_list_model.dart';
-
 class CartModel {
-  late ProductListModel productListModel;
-  late int quantity;
+  String? image;
+  String? name;
+  String? id;
+  String? price;
+  int? quantity;
 
 
-  CartModel(this.productListModel, this.quantity);
+  CartModel({this.image, this.name, this.id, this.price, this.quantity});
 
   CartModel.fromJson(Map<String, dynamic> json) {
-    quantity = json['quantity'] ?? 0;
-    productListModel = ProductListModel.fromJson(json['productListModel']);
+    image = json['image'];
+    name = json['name'];
+    id = json['id'];
+    price = json['price'];
+    quantity = json['quantity'];
   }
 
   Map<String, dynamic> toJson() {
-    Map<String, dynamic> data = <String, dynamic>{};
-    data['productListModel'] = productListModel.toJson();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['image'] = image;
+    data['name'] = name;
+    data['id'] = id;
+    data['price'] = price;
     data['quantity'] = quantity;
     return data;
   }

@@ -7,7 +7,6 @@ import 'package:flutter_task/widgets/loader.dart';
 import 'package:get/get.dart';
 
 class ProductListViewModel extends GetxController {
-  RxInt cartCount = 0.obs;
   List<ProductListModel> productList = <ProductListModel>[].obs;
   DBHelper db = DBHelper();
 
@@ -21,21 +20,50 @@ class ProductListViewModel extends GetxController {
   @override
   void onReady() {
     super.onReady();
-    getData();
+    getDataFromSqlFLite();
+    getDataFromApi();
   }
 
-  getData() async {
+  getDataFromSqlFLite() async {
+    await db.loadCartData();
+    calculateCartQuantity();
+  }
+
+  getDataFromApi() async {
     Loader.loader.value = true;
     FirebaseFirestore fireStore = FirebaseFirestore.instance;
     QuerySnapshot querySnapshot = await fireStore.collection('Products').get();
     final allData = querySnapshot.docs.map((doc) => doc.data()).toList();
-    productList.addAll(allData
-        .map((e) => ProductListModel.fromJson(e as Map<String, dynamic>)));
+    productList.addAll(allData.map((e) => ProductListModel.fromJson(e as Map<String, dynamic>)));
     Loader.loader.value = false;
   }
 
+  calculateCartQuantity() {
+    GlobalVariables.cartCount.value = GlobalVariables.cartList.fold(0, (sum, next) => sum + next.quantity!);
+  }
+
   addToCart(int index) {
-    cartCount.value++;
-    db.insertCartItem(productList[index].toJson());
+    int valueIndex = GlobalVariables.cartList.indexWhere(
+      (item) => item.id == productList[index].id,
+    );
+
+    if (valueIndex != -1) {
+      CartModel model = GlobalVariables.cartList[valueIndex];
+      model.quantity = (model.quantity! + 1);
+      GlobalVariables.cartList[valueIndex] = model;
+      db.updateCartItem(model);
+    } else {
+      CartModel model = CartModel(
+        id: productList[index].id,
+        image: productList[index].image,
+        name: productList[index].name,
+        price: productList[index].price,
+        quantity: 1,
+      );
+      GlobalVariables.cartList.add(model);
+      db.insertCartItem(model);
+    }
+
+    GlobalVariables.cartCount.value++;
   }
 }
